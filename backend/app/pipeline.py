@@ -60,4 +60,32 @@ def build_positions(session):
 
     return pd.concat(frames, ignore_index=True)
 
+def extract_driver_telemetry(session, driver_number):
+    tel = session.car_data[driver_number]
+    driver_code = session.get_driver(driver_number)['Abbreviation']
+
+    return pd.DataFrame({
+        'time': tel['Time'].dt.total_seconds(),
+        'driver': driver_code,
+        'speed': tel['Speed'],
+        'throttle': tel['Throttle'],
+        'brake': tel['Brake'],
+        'gear': tel['nGear'],
+        'drs': tel['DRS'],
+    })
+
+def build_telemetry(session):
+    frames = []
+
+    for driver_number in session.drivers:
+        frames.append(extract_driver_telemetry(session, driver_number))
+
+    return pd.concat(frames, ignore_index=True)
+
 build_positions(session).to_parquet("data/silverstone_2024/positions.parquet", index=False)
+build_telemetry(session).to_parquet("data/silverstone_2024/telemetry.parquet", index=False)
+
+df = pd.read_parquet("data/silverstone_2024/telemetry.parquet")
+print(df.shape)
+print(df.head())
+print(session.laps[['Driver', 'LapNumber', 'Compound', 'TyreLife', 'Stint']].head(20))
