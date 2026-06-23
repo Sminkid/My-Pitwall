@@ -89,3 +89,10 @@ df = pd.read_parquet("data/silverstone_2024/telemetry.parquet")
 print(df.shape)
 print(df.head())
 print(session.laps[['Driver', 'LapNumber', 'Compound', 'TyreLife', 'Stint']].head(20))
+
+print(session.laps.columns.tolist())
+print(session.laps[session.laps['Driver'] == 'HAM'][['LapNumber', 'Position', 'LapTime']].head(20))
+
+laps = session.laps[session.laps['Driver'].isin(['HAM', 'VER'])][['Driver', 'LapNumber', 'LapTime']]
+laps = laps.sort_values('LapNumber')
+print(laps.head(20))
